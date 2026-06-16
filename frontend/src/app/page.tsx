@@ -70,6 +70,20 @@ export default function Home() {
           ))}
         </div>
 
+        {/* About + how it works */}
+        <div style={{ ...tile, marginBottom: 20, borderLeft: "3px solid #2dd4bf" }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: "#2dd4bf" }}>What DomainAppraiser does</div>
+          <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.6, margin: "6px 0 12px" }}>Get an AI-consensus valuation for any domain name. Multiple AI validators independently fetch the site and weigh length, keywords, extension, usage, and comparable sales — then must agree on a grade (A–F) and price range before it's written on-chain. No single appraiser's bias.</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10 }}>
+            {[["1", "Connect wallet (top right)"], ["2", "Enter a domain + appraisal fee"], ["3", "Run the AI appraisal"], ["4", "Read the grade, value range & rationale"]].map(([n, t]) => (
+              <div key={n} style={{ background: "#0a0e14", border: "1px solid #1a2230", borderRadius: 8, padding: "10px 12px" }}>
+                <span style={{ color: "#2dd4bf", fontFamily: "monospace", fontSize: 12 }}>0{n}</span>
+                <div style={{ fontSize: 13, color: "#cbd5e1", marginTop: 3 }}>{t}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 20 }}>
           {/* left: new appraisal form */}
           <div style={{ ...tile, alignSelf: "start" }}>
