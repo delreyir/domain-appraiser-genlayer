@@ -2,30 +2,25 @@
 
 **Know what a domain is really worth. AI consensus, not guesswork.**
 
-Submit any domain name and get a multi-AI-verified valuation stored on-chain. Validators fetch the actual site, analyze everything from keyword strength to comparable sales, and agree on a grade and price range. No single appraiser's opinion. No inflated estimates. Just decentralized consensus on market value.
+🔗 **Live app:** https://domain-appraiser.pages.dev
+📜 **Contract (GenLayer Studionet):** `0x8cdD6aB8A60F5f3096bD275bA7E33917A52d88A9`
 
 ---
 
 ## The Problem
 
-Domain valuation is subjective. Ask three appraisers and get three wildly different numbers. Sellers inflate, buyers lowball, and there's no neutral source of truth. Existing tools use simple formulas that miss context — they can't see what's actually on the site or understand industry trends.
+Domain valuation is subjective — ask three appraisers and get three wildly different numbers. Sellers inflate, buyers lowball, and automated tools use simple formulas that can't see what's actually on the site or understand industry context.
 
-DomainAppraiser uses multiple AI models that independently fetch and analyze the domain, then must agree before a valuation is stamped. Disagreements get filtered out by consensus.
+DomainAppraiser uses multiple AI validators that independently fetch and analyze a domain, then must agree before a valuation is written on-chain.
 
 ---
 
 ## How It Works
 
-1. **Submit Domain** — Enter any domain (e.g. `startup.io`) and pay a small appraisal fee
-2. **AI Validators Fetch & Analyze** — Each validator independently:
-   - Fetches the live website content
-   - Evaluates domain length, memorability, and brandability
-   - Assesses keyword value and search demand
-   - Checks extension quality (.com > .xyz)
-   - Analyzes current usage (active business vs parked page)
-   - Considers industry relevance and comparable sales
-3. **Consensus** — Grade must match exactly. Estimated value must be within 40% across validators
-4. **On-Chain Report** — Grade (A-F), price range, strengths, weaknesses, comparables — stored permanently
+1. **Connect your wallet** (MetaMask, Rabby, or any EVM wallet — no Snap required)
+2. **Submit a domain** + a small appraisal fee.
+3. **Run the AI appraisal** — validators fetch the live site and assess length, keywords, extension, usage, brandability, and comparable sales.
+4. **Read the result** — a grade (A–F), a price range, strengths, weaknesses, and comparables — stored permanently on-chain.
 
 ---
 
@@ -36,55 +31,37 @@ DomainAppraiser uses multiple AI models that independently fetch and analyze the
   "grade": "B",
   "estimated_value_usd": 15000,
   "estimated_value_high_usd": 35000,
-  "strengths": ["Short, memorable", "High-value keyword", "Active business"],
-  "weaknesses": [".io extension limits mass market appeal"],
-  "comparable_sales": "similar 2-word .io domains sold for $10k-$50k",
-  "summary": "Strong brandable domain with active usage. Premium for the .io space."
+  "strengths": ["Short, memorable", "High-value keyword"],
+  "weaknesses": [".io limits mass-market appeal"],
+  "comparable_sales": "similar 2-word .io domains sold for $10k–$50k",
+  "summary": "Strong brandable domain with active usage."
 }
 ```
 
 ---
 
-## Use Cases
-
-- **Domain investors** — Screen portfolios before buying
-- **Sellers** — Set fair asking prices backed by AI consensus
-- **Startups** — Evaluate if a domain is worth the asking price
-- **Disputes** — On-chain proof of value at a specific point in time
-- **Portfolios** — Batch-appraise domain collections
-
----
-
 ## Why GenLayer?
 
-Domain valuation requires:
-1. **Web access** — Fetching live site content to understand current usage
-2. **Subjective judgment** — Assessing "brandability" and "memorability" isn't math
-3. **Consensus** — Multiple perspectives prevent one model's bias from dominating
-
-Traditional oracles can't judge domain quality. Traditional smart contracts can't fetch websites. GenLayer does both.
+Domain valuation requires fetching live web data **and** subjective judgment about brandability — neither possible on a normal blockchain. GenLayer validators each fetch the domain and value it independently; the grade must match exactly and the estimated value must agree within 40% (domains are volatile) before the appraisal finalizes.
 
 ---
 
-## Consensus Rules
+## Wallet & Network
 
-| Field | Rule |
-|-------|------|
-| Grade (A-F) | Must match exactly across validators |
-| Estimated value | Within 40% tolerance (domains are volatile) |
-| Strengths/Weaknesses | Not compared (subjective text) |
-
-The 40% tolerance accounts for the inherent uncertainty in domain pricing — two experts rarely agree within tighter bounds.
+Standard EVM wallet, normal signing popup — **no GenLayer Snap**. On connect it adds/switches to the **GenLayer Studio Network** (chain `61999`, RPC `https://studio.genlayer.com/api`).
 
 ---
 
-## Deployed Contract
+## Contract API
 
-```
-Network: GenLayer Studionet
-Address: 0x8cdD6aB8A60F5f3096bD275bA7E33917A52d88A9
-Status:  5/5 validators AGREE
-```
+| Method | Type | Description |
+|--------|------|-------------|
+| `request_appraisal(domain)` | payable | Submit a domain + fee |
+| `appraise(appraisal_id)` | write (AI) | Run the multi-AI valuation |
+| `get_appraisal(appraisal_id)` | view | Full appraisal report |
+| `get_appraisal_count()` | view | Total appraisals |
+
+**Consensus rule:** `grade` must match exactly; `estimated_value_usd` within 40% across validators.
 
 ---
 
@@ -93,49 +70,34 @@ Status:  5/5 validators AGREE
 ```
 domain-appraiser-genlayer/
 ├── contracts/
-│   └── domain_appraiser.py    # Intelligent Contract
+│   └── domain_appraiser.py  # GenLayer Intelligent Contract (Python)
 ├── frontend/
-│   ├── src/app/
-│   │   ├── layout.tsx
-│   │   └── page.tsx           # Appraisal UI
-│   ├── src/lib/genlayer.ts
-│   ├── package.json
-│   └── tsconfig.json
-├── .gitignore
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── layout.tsx
+│   │   │   └── page.tsx     # Analytics-dashboard UI
+│   │   └── lib/
+│   │       └── genlayer.ts  # Wallet connect (no Snap) + read client
+│   ├── next.config.js
+│   └── package.json
 └── README.md
 ```
 
 ---
 
-## Quick Start
+## Run Locally
 
 ```bash
-# Install CLI
 npm install -g genlayer
-
-# Deploy (or use deployed address above)
 genlayer network set studionet
-genlayer account create --name appraiser --password "yourpass"
+genlayer account create --name deployer --password "yourpass"
 genlayer account unlock --password "yourpass"
 genlayer deploy --contract contracts/domain_appraiser.py
 
-# Frontend
 cd frontend
 npm install
-echo "NEXT_PUBLIC_CONTRACT_ADDRESS=0x8cdD6aB8A60F5f3096bD275bA7E33917A52d88A9" > .env.local
 npm run dev
 ```
-
----
-
-## Contract API
-
-| Method | Type | Description |
-|--------|------|-------------|
-| `request_appraisal(domain)` | payable | Submit domain + pay fee |
-| `appraise(appraisal_id)` | write (AI) | Triggers multi-AI valuation |
-| `get_appraisal(appraisal_id)` | view | Get full appraisal report |
-| `get_appraisal_count()` | view | Total appraisals submitted |
 
 ---
 
@@ -143,11 +105,12 @@ npm run dev
 
 | Layer | Technology |
 |-------|-----------|
-| Contract | Python (GenLayer Intelligent Contract) |
-| Web Access | `gl.nondet.web.get()` — fetches live domains |
-| AI Consensus | `gl.vm.run_nondet_unsafe` + grade match + value tolerance |
-| Frontend | Next.js + TypeScript |
-| SDK | GenLayerJS |
+| Smart contract | Python — GenLayer Intelligent Contract |
+| Web access | `gl.nondet.web.get()` |
+| AI consensus | `gl.vm.run_nondet_unsafe` + numeric tolerance |
+| Frontend | Next.js (static export) + TypeScript |
+| SDK | genlayer-js |
+| Hosting | Cloudflare Pages |
 
 ---
 
