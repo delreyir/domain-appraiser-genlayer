@@ -44,7 +44,10 @@ class DomainAppraiser(gl.Contract):
         domain = appraisal["domain"]
 
         def leader_fn():
-            web_data = gl.nondet.web.get(f"https://{domain}").body.decode("utf-8")
+            try:
+                web_data = gl.nondet.web.get(f"https://{domain}").body.decode("utf-8", "ignore")
+            except Exception:
+                web_data = ""
             prompt = f"""You are a domain name appraiser. Evaluate the market value of this domain.
 
 DOMAIN: {domain}
@@ -70,24 +73,47 @@ Return JSON:
     "comparable_sales": "brief mention of similar domains",
     "summary": "brief valuation explanation"
 }}"""
-            response = gl.nondet.exec_prompt(prompt)
-            return json.loads(response)
+            raw = gl.nondet.exec_prompt(prompt, response_format="json")
+            if not isinstance(raw, dict):
+                raw = {}
+            grade = str(raw.get("grade", "C")).strip().upper()[:1]
+            if grade not in ("A", "B", "C", "D", "F"):
+                grade = "C"
+            try:
+                low_val = max(0, int(raw.get("estimated_value_usd", 0)))
+            except (TypeError, ValueError):
+                low_val = 0
+            try:
+                high_val = max(0, int(raw.get("estimated_value_high_usd", 0)))
+            except (TypeError, ValueError):
+                high_val = 0
+            return {
+                "estimated_value_usd": low_val,
+                "estimated_value_high_usd": high_val,
+                "grade": grade,
+                "strengths": raw.get("strengths", []),
+                "weaknesses": raw.get("weaknesses", []),
+                "comparable_sales": str(raw.get("comparable_sales", "")),
+                "summary": str(raw.get("summary", ""))[:1000],
+            }
 
         def validator_fn(leader_result) -> bool:
+            # Robust consensus: agree on the normalized letter grade only.
             if not isinstance(leader_result, gl.vm.Return):
                 return False
-            validator_data = leader_fn()
-            leader_data = leader_result.calldata
-            # Grade must match, value within 40% tolerance
-            if leader_data["grade"] != validator_data["grade"]:
+            raw = gl.nondet.exec_prompt(prompt, response_format="json")
+            if not isinstance(raw, dict):
+                raw = {}
+            grade = str(raw.get("grade", "C")).strip().upper()[:1]
+            if grade not in ("A", "B", "C", "D", "F"):
+                grade = "C"
+            try:
+                leader_grade = str(leader_result.calldata["grade"]).strip().upper()[:1]
+            except (TypeError, KeyError):
                 return False
-            leader_val = leader_data["estimated_value_usd"]
-            validator_val = validator_data["estimated_value_usd"]
-            if leader_val == 0:
-                return validator_val == 0
-            return abs(leader_val - validator_val) / max(leader_val, 1) <= 0.4
+            return grade == leader_grade
 
-        result = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)
+        result = gl.vm.run_nondet(leader_fn, validator_fn)
 
         appraisal["status"] = 1
         appraisal["valuation"] = json.dumps(result)
