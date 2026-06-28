@@ -3,7 +3,6 @@
 **Know what a domain is really worth. AI consensus, not guesswork.**
 
 🔗 **Live app:** https://domain-appraiser.pages.dev
-📜 **Contract (GenLayer Studionet):** `0x8cdD6aB8A60F5f3096bD275bA7E33917A52d88A9`
 
 ---
 
